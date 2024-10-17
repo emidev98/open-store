@@ -1,13 +1,18 @@
-const { Pool } = require('pg');
 const { config } = require('../config/config');
 
 const USER = encodeURIComponent(config.dbUser);
 const PASSWORD = encodeURIComponent(config.dbPassword);
 const URI = `postgresql://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
 
-const pool = new Pool({
-  connectionString: URI
-});
-
-
-module.exports = pool;
+module.exports = {
+  development: {
+    url: URI,
+    dialect: 'postgres',
+    logging: config.env === 'development' ? console.log : false,
+  },
+  production: {
+    url: URI,
+    dialect: 'postgres',
+    logging: false,
+  },
+}

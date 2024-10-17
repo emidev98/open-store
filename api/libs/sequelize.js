@@ -13,7 +13,5 @@ const sequelize = new Sequelize(URI, {
 });
 
 setupModels(sequelize);
-// Get the models and create the structure in the database
-sequelize.sync();
 
 module.exports = sequelize;

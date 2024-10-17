@@ -1,47 +1,47 @@
-const { faker } = require('@faker-js/faker');
 const boom = require('@hapi/boom');
-const sequelize = require('../libs/sequelize');
+const { models } = require('../libs/sequelize');
+const { Op } = require('sequelize');
 
 class ProductsService {
-
-  constructor() {
-    this.products = [];
-    this.generate();
-  }
-
-  generate() {
-    const limit = 2;
-
-    for (let index = 0; index < limit; index++) {
-      this.products.push({
-        id: faker.string.uuid(),
-        name: faker.commerce.productName(),
-        price: Number(faker.commerce.price()),
-        image: faker.image.url(),
-        isDisabled: faker.datatype.boolean(),
-      });
-    }
-  }
-
   async create(data) {
-    const newProduct = {
-      id: faker.string.uuid(),
-      ...data,
-    };
-
-    this.products.push(newProduct);
-
+    const newProduct = await models.Product.create(data);
     return newProduct;
   }
 
-  async find() {
-    const query = 'SELECT * FROM tasks';
-    const [data] = await sequelize.query(query);
-    return data;
+  async find(query) {
+    const options = {
+      include: ['category'],
+      where: {},
+    };
+
+    const { limit, offset } = query;
+    if (limit && offset) {
+      options.limit = limit;
+      options.offset = offset;
+    }
+
+    const {price } = query;
+    if (price) {
+      options.where.price = price;
+    }
+
+    const { min_price, max_price } = query;
+    if (min_price && max_price) {
+      options.where.price = {
+        [Op.gte]: min_price,
+        [Op.lte]: max_price,
+      };
+    }
+
+
+    const products = models.Product.findAll(options);
+    return products;
   }
 
   async findOne(id) {
-    const product = this.products.find((product) => product.id === id);
+    const product = models.Product.findByPk(id, {
+      include: ['category'],
+    });
 
     if (product.isDisabled) {
       throw boom.conflict(`Product with id ${id} is disabled`);
