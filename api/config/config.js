@@ -8,6 +8,7 @@ const config = {
   dbHost: process.env.DB_HOST || 'localhost',
   dbName: process.env.DB_NAME || 'open_store',
   dbPort: process.env.DB_PORT || 5432,
+  apiKey: process.env.API_KEY
 };
 
 module.exports = { config };
