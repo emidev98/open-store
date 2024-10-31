@@ -9,11 +9,13 @@ class CustomerService {
     const passwordHash = await bcrypt.hash(data.user.password, 10);
     data.user.password = passwordHash;
 
-    const newCustomer = await models.Customer.create(data, {
-      include: ['user'],
+    const newUser = await models.User.create(data.user);
+    const newCustomer = await models.Customer.create({
+      ...data,
+      userId: newUser.id,
     });
 
-    delete newCustomer.dataValues.user.dataValues.password;
+    delete newCustomer.dataValues.password;
     return newCustomer;
   }
 
